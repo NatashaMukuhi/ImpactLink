@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Organization dashboard | ImpactLink</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link href="css/style.css" rel="stylesheet"></head><body><div id="nav"></div>
+<main>
+  <h2>Organization dashboard</h2>
+  <div class="grid g2" style="align-items:start">
+    <div class="card" style="gap:8px"><h3>Post an opportunity</h3>
+      <div class="f"><label for="t">Title</label><input id="t" type="text" placeholder="e.g. Weekend tutoring"><div class="err" id="te">Enter a title.</div></div>
+      <div class="f"><label for="l">Location</label><select id="l"></select></div>
+      <div class="f"><label for="s">Required skill</label><select id="s"></select></div>
+      <button class="btn" style="margin-top:8px" onclick="post()">Publish</button></div>
+    <div class="card"><h3>Applicants</h3><div id="ap" style="width:100%"></div></div>
+  </div>
+</main>
+<script src="js/app.js"></script><script>
+IL.nav('org');
+const u=IL.require('Organization'),$=id=>document.getElementById(id);
+$('l').innerHTML=IL.LOCS.map(x=>`<option>${x}</option>`).join('');$('s').innerHTML=IL.SKILLS.map(x=>`<option>${x}</option>`).join('');
+const mine=()=>IL.opps().filter(o=>o.owner===u.email||o.owner==='seed');
+function draw(){const opps=mine(),ids=opps.map(o=>o.id),all=IL.apps().filter(a=>ids.includes(a.oppId));
+$('ap').innerHTML=all.map(a=>{const o=opps.find(x=>x.id===a.oppId);
+return `<div class="rw"><span>${IL.esc(a.name)} &middot; ${IL.esc(o.title)}</span><span class="mu">${a.score}%</span>${a.status==='Pending'?`<button class="btn s" onclick="setS(${a.id},'Accepted')">Accept</button>`:IL.status(a.status)}</div>`}).join('')||'<p>No applicants yet. Apply to an opportunity as a volunteer first.</p>';}
+function setS(id,s){const a=IL.apps();a.find(x=>x.id===id).status=s;IL.write('il_apps',a);IL.toast('Volunteer '+s.toLowerCase());draw();}
+function post(){const t=$('t').value.trim();$('te').classList.toggle('on',!t);if(!t)return;
+const all=IL.opps();all.push({id:Date.now(),title:t,org:u.name,owner:u.email,loc:$('l').value,skills:[$('s').value],interests:['Education'],days:['Sat'],accessible:true,desc:'New opportunity posted by '+u.name+'.'});
+IL.write('il_opps',all);$('t').value='';IL.toast('Opportunity published');draw();}
+if(u)draw();
+</script>

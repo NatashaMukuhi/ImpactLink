@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Opportunities | ImpactLink</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link href="css/style.css" rel="stylesheet"></head><body><div id="nav"></div>
+<main>
+  <h2>Recommended for you</h2><p class="mu" id="sub">Tap your skills to see matches re-rank.</p>
+  <div id="sk" style="margin:14px 0"></div>
+  <div class="row" style="margin-bottom:6px"><select id="loc" style="max-width:220px"><option value="">All locations</option></select></div>
+  <div class="grid g2" id="list"></div>
+</main>
+<script src="js/app.js"></script><script>
+IL.nav('opps');
+const u=IL.user(),vol=u&&u.role==='Volunteer',p=vol?u.profile:IL.guest(),$=id=>document.getElementById(id);
+if(!vol)$('sub').textContent='Tap your skills to see matches re-rank. Log in as a volunteer to save your profile.';
+IL.LOCS.forEach(l=>$('loc').insertAdjacentHTML('beforeend',`<option>${l}</option>`));
+function tog(s){const i=p.skills.indexOf(s);i>-1?p.skills.splice(i,1):p.skills.push(s);if(vol)IL.saveUser(u);draw();}
+function draw(){const f=$('loc').value;
+$('sk').innerHTML=IL.chipsT(IL.SKILLS,p.skills,'tog');
+const r=IL.opps().filter(o=>!f||o.loc===f).sort((a,b)=>IL.score(b,p)-IL.score(a,p));
+$('list').innerHTML=r.map(o=>IL.oppCard(o,p)).join('')||'<p class="mu">No opportunities found.</p>';}
+$('loc').onchange=draw;draw();
+</script>

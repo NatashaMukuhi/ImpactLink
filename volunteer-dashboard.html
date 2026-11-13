@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Volunteer dashboard | ImpactLink</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link href="css/style.css" rel="stylesheet"></head><body><div id="nav"></div>
+<main>
+  <h2>My dashboard</h2>
+  <div class="grid g2" style="align-items:start">
+    <div class="card"><h3>Profile</h3><p id="meta"></p>
+      <label>Skills</label><div id="fs" style="width:100%"></div>
+      <label>Interests</label><div id="fi" style="width:100%"></div>
+      <label>Available days</label><div id="fd" style="width:100%"></div>
+      <div class="f"><label for="loc">Location</label><select id="loc"></select></div></div>
+    <div class="card"><h3>My applications</h3><div id="apps" style="width:100%"></div></div>
+  </div>
+</main>
+<script src="js/app.js"></script><script>
+IL.nav('vol');
+const u=IL.require('Volunteer'),$=id=>document.getElementById(id);
+function flip(k,v){const a=u.profile[k],i=a.indexOf(v);i>-1?a.splice(i,1):a.push(v);IL.saveUser(u);draw();}
+const fs=v=>flip('skills',v),fi=v=>flip('interests',v),fd=v=>flip('days',v);
+function draw(){const p=u.profile,opps=IL.opps(),mine=IL.apps().filter(a=>a.volunteer===u.email);
+$('meta').textContent=(u.usiu?'USIU-Africa student, ':'')+p.loc;
+$('fs').innerHTML=IL.chipsT(IL.SKILLS,p.skills,'fs');$('fi').innerHTML=IL.chipsT(IL.INTERESTS,p.interests,'fi');$('fd').innerHTML=IL.chipsT(IL.DAYS,p.days,'fd');
+$('loc').innerHTML=IL.LOCS.map(l=>`<option ${l===p.loc?'selected':''}>${l}</option>`).join('');
+$('apps').innerHTML=mine.map(a=>{const o=opps.find(x=>x.id===a.oppId);return `<div class="rw"><a href="opportunity.html?id=${a.oppId}">${IL.esc(o?o.title:'Removed')}</a>${IL.status(a.status)}</div>`}).join('')||'<p>No applications yet. Browse opportunities to apply.</p>';}
+$('loc').onchange=()=>{u.profile.loc=$('loc').value;IL.saveUser(u);IL.toast('Location updated');draw();};
+if(u)draw();
+</script>

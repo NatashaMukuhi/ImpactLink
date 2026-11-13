@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sign up | ImpactLink</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link href="css/style.css" rel="stylesheet"></head><body><div id="nav"></div>
+<main><div class="card auth">
+  <h2>Create your account</h2>
+  <label>I am a</label>
+  <div class="sel"><button id="rv" class="on" onclick="setRole('Volunteer')">Volunteer</button><button id="ro" onclick="setRole('Organization')">Organization</button></div>
+  <div class="f"><label for="n" id="nl">Full name</label><input id="n" type="text" placeholder="Your name" autocomplete="name"><div class="err" id="ne">Enter a name.</div></div>
+  <div class="f"><label for="e">Email</label><input id="e" type="email" placeholder="you@example.com" autocomplete="email"><div class="err" id="ee">Enter a valid email address.</div></div>
+  <div class="f" id="vf"><label for="l">Location</label><select id="l"></select>
+    <label class="cb" style="margin-top:8px"><input type="checkbox" id="usiu"> I am a USIU-Africa student</label></div>
+  <div class="f"><label for="p">Password</label><input id="p" type="password" placeholder="At least 6 characters" autocomplete="new-password"><div class="err" id="pe">Password must be at least 6 characters.</div></div>
+  <div class="f"><label for="c">Confirm password</label><input id="c" type="password" placeholder="Repeat password" autocomplete="new-password"><div class="err" id="ce">Passwords do not match.</div></div>
+  <div class="err" id="ae">An account with this email already exists.</div>
+  <button class="btn w" onclick="go()">Sign up</button>
+  <div class="center">Already have an account? <a href="login.html">Log in</a></div>
+</div></main>
+<script src="js/app.js"></script><script>
+IL.nav('signup');
+const EM=/^[^@\s]+@[^@\s]+\.[^@\s]+$/,$=id=>document.getElementById(id);let role='Volunteer';
+$('l').innerHTML=IL.LOCS.map(x=>`<option>${x}</option>`).join('');
+function setRole(r){role=r;$('rv').className=r==='Volunteer'?'on':'';$('ro').className=r==='Organization'?'on':'';
+$('vf').style.display=r==='Volunteer'?'flex':'none';$('nl').textContent=r==='Volunteer'?'Full name':'Organization name';}
+async function go(){const c=[['n',$('n').value.trim().length>0],['e',EM.test($('e').value.trim())],['p',$('p').value.length>=6],['c',$('c').value===$('p').value]];
+c.forEach(x=>$(x[0]+'e').classList.toggle('on',!x[1]));if(!c.every(x=>x[1]))return;
+const d={name:$('n').value.trim(),email:$('e').value.trim(),password:$('p').value,role,loc:$('l').value,usiu:$('usiu').checked};let u=null,msg='An account with this email already exists.';
+try{const r=await IL.api('signup',d);if(r.ok){u=r.user;IL.adopt(u);}else msg=r.error||msg;}
+catch(e){u=IL.signup(Object.assign({},d));if(u)IL.toast('Server not reachable: account saved in offline demo mode');}
+$('ae').textContent=msg;$('ae').classList.toggle('on',!u);
+if(u)location.href=role==='Organization'?'org-dashboard.html':'volunteer-dashboard.html';}
+</script>

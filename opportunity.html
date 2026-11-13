@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Opportunity | ImpactLink</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"><link href="css/style.css" rel="stylesheet"></head><body><div id="nav"></div>
+<main id="main"></main>
+<script src="js/app.js"></script><script>
+IL.nav('opps');
+const id=+new URLSearchParams(location.search).get('id'),o=IL.opps().find(x=>x.id===id);
+const u=IL.user(),vol=u&&u.role==='Volunteer',p=vol?u.profile:IL.guest();
+const L={skills:'Skills',interests:'Interests',avail:'Availability',loc:'Location',acc:'Accessibility'};
+function draw(){
+if(!o){document.getElementById('main').innerHTML='<p>Opportunity not found. <a href="opportunities.html">Back</a></p>';return;}
+const applied=vol&&IL.apps().some(a=>a.oppId===o.id&&a.volunteer===u.email),x=IL.parts(o,p),sc=IL.score(o,p);
+document.getElementById('main').innerHTML=`<a class="btn o s" href="opportunities.html">Back</a>
+<h2 style="margin-top:20px">${IL.esc(o.title)}</h2><p class="mu">${IL.esc(o.org)} &middot; ${IL.esc(o.loc)}</p>
+<p style="font-size:17px;max-width:640px">${IL.esc(o.desc)}</p>
+<div class="card" style="width:560px;max-width:100%;margin:20px 0"><h3>Why you match: ${sc}%</h3>
+${Object.keys(L).map(k=>`<div class="mu s">${L[k]} (weight ${IL.W[k]}%)</div><div class="bar"><i style="width:${Math.min(100,IL.W[k]*3.3*x[k])}%"></i></div>`).join('')}</div>
+<button class="btn" id="ap" ${applied?'disabled style="opacity:.6"':''}>${applied?'Applied':'Apply now'}</button>`;
+document.getElementById('ap').onclick=()=>{
+if(!vol){location.href='login.html';return;}
+const all=IL.apps();all.push({id:Date.now(),oppId:o.id,volunteer:u.email,name:u.name,status:'Pending',date:new Date().toISOString().slice(0,10),score:sc});
+IL.write('il_apps',all);IL.toast('Application sent');draw();};}
+draw();
+</script>
